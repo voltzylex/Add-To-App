@@ -28,6 +28,16 @@ class _MyAppState extends State<MyApp> {
     platform.setMethodCallHandler(_handleNativeMethod);
   }
 
+  Future<void> showToast() async {
+    try {
+      final res =
+          await platform.invokeMethod("log", _username ?? "No user name");
+      print("Show toast: $res");
+    } on PlatformException catch (e) {
+      print("PlatformException caught ${e.message}");
+    }
+  }
+
   Future<void> _handleNativeMethod(MethodCall call) async {
     if (call.method == "login") {
       // Extract login data from the arguments.
@@ -45,7 +55,8 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Module',
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Module Screen (For login data from Native Screen)'),
+          title: const Text(
+              'Flutter Module Screen (For login data from Native Screen)'),
         ),
         body: Center(
           child: _username != null
@@ -58,6 +69,11 @@ class _MyAppState extends State<MyApp> {
                   ],
                 )
               : const Text('No login data received.'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: showToast,
+          tooltip: "Toast Invoke",
+          child: const Icon(Icons.tap_and_play_rounded),
         ),
       ),
     );

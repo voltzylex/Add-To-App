@@ -45,3 +45,4 @@ rootProject.name = "NativeAndroid"
 
 // Include the main app module
 include(":app")
+include(":mylibrary")

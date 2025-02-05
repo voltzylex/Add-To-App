@@ -1,6 +1,7 @@
 package com.example.nativeandroid.ui.login
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nativeandroid.databinding.ActivityLoginBinding
 import io.flutter.embedding.android.FlutterActivity
@@ -8,6 +9,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
+import java.lang.reflect.Method
 
 class LoginActivity : AppCompatActivity() {
     // Define the channel name for communication with Flutter
@@ -22,21 +24,33 @@ class LoginActivity : AppCompatActivity() {
 
 
         val cache = FlutterEngineCache.getInstance().get("my_engine")
-            binding.login.isEnabled = true;
+        binding.login.isEnabled = true;
         // Set up the login button click listener
         binding.login.setOnClickListener {
             // Retrieve text from username and password fields.
             val usernameText = binding.username.text.toString()
             val passwordText = binding.password.text.toString()
-            if(cache != null){
+            if (cache != null) {
                 // Create a MethodChannel using the cached engine's binary messenger.
                 val channel = MethodChannel(cache.dartExecutor.binaryMessenger, CHANNEL)
+                channel.setMethodCallHandler { call, result ->
+                    when (call.method) {
+                        "log"->{
+                            var logDetail = call.arguments<String>();
+                            Toast.makeText(this, "Log Toast is $logDetail", Toast.LENGTH_SHORT).show()
+                            result.success(true)
+                        }
 
+                    }
+
+                }
                 // Send login credentials to Flutter via the method channel.
-                channel.invokeMethod("login", mapOf(
-                    "username" to usernameText,
-                    "password" to passwordText
-                ))
+                channel.invokeMethod(
+                    "login", mapOf(
+                        "username" to usernameText,
+                        "password" to passwordText
+                    )
+                )
                 val flutterIntent = FlutterActivity.withCachedEngine("my_engine").build(this)
                 startActivity(flutterIntent)
             }
@@ -48,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
             //        )
             //        // Cache the engine with a key "my_engine" for later use.
             //        FlutterEngineCache.getInstance().put("my_engine", flutterEngine)
-                        // Launch FlutterActivity using the cached engine.
+            // Launch FlutterActivity using the cached engine.
             //            val flutterIntent = FlutterActivity.withCachedEngine("my_engine").build(this)
             //            startActivity(flutterIntent)
         }
